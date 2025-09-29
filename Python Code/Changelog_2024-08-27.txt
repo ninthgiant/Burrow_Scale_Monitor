@@ -1,0 +1,46 @@
+--------------------------------------------------------
+2024-08-07 
+
+We now just calculate weights from mean(=w1), median, and window with the best/min slope (=doSlope0)
+    No need to calculate W2 in the program itself when we are also outputting the slope information?
+
+Added process_auto() function
+    See documentation for details
+    Currently asks user for manual calibration
+    Then automatically scans that single file
+    This is quite fast even on large files, because the vast majority of the data is ignored (<30g)
+    Even with w_windowed_min_slope doing the measurements, these measurements are only calculated WITHIN the areas of the trace >30g
+
+Catch error invalid calibration values entered in gui window
+
+Catch errors from incomplete DraggableMarker pairs
+    This is done by confirming the new "good" return value every time we call get_trace_point_pair()
+    After every call we return, break, or continue, depending on the context
+    This makes some errors much smoother, e.g., now you only have to exit out of a window once if you select the wrong file
+
+Moved all output to output_() functions in MOM_Processing
+    NOTE rounding happens only in output_weights, not anywhere else!
+
+Output includes a counter that marks the number of traces measured from the same file.
+    This means we can easily match manual OR automated trace measurements to a spreadsheet of known weights with column names Filename | Trace_Segment_Num | True_Weight
+
+Output includes the number of samples in the full trace segment (as used for mean), and the number of samples in the window with the lowest min slope
+
+Output includes the slope across the full trace segment (as used for w1) and the slope in the minimum slope window (as used for doSlope0)
+ This means we don't need to do any weight adjustments in the program itself. These can be calculate W2 in excel
+
+Moved fit_slope to separate function in MOM_Calculations
+    This is always used to calculate the np.polyfit slope across any section of data
+    Will make it easier to change to stats.linregress later if that proves faster
+
+Moved user calibration to separate function in MOM_Processing
+    This means we can call it in Manual, or semi-automatic as desired
+
+Moved run weights to separate function in MOM_Processing
+    Returns a formatted CSV line as defined in output_weights()
+    Optional adding a header line, as passed to output_weights()
+    Optional printing to GUI screen, as passed to output_weights()
+    This means we can use the same chunk of code to run in Manual, Automatic, etc.
+    Also means we can store the return value (formatted CSV string) to write to a batch file
+
+--------------------------------------------------------
